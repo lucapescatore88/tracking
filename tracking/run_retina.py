@@ -11,7 +11,7 @@ dimensions = {
     'phi' :   { 'min' : 0., 'max' : 2*math.pi, 'npoints' : 50}
     }
 
-myretina = retina.retina(npoints = 50, nplanes = 20, pl_dist = 3.)#, time=True)
+myretina = retina.retina(npoints = 100, nplanes = 20, pl_dist = 3., twoD=True)
 
 geom = planes(
 			nplanes = 20,	# Number of planes
@@ -24,7 +24,8 @@ evt_gen = gen(
 			geometry = geom,
 			hit_eff = 1.,	# Hit efficiency. 1 for simplicity
 			lumi_sigma = [0.1,0.1,5.], # Luminosity region gaussian with sigma = 5 cm around 0
-			sigma = [0.1,0.1,0.,30.]
+			sigma = [0.1,0.1,0.,30.],
+            twoD = True
 		)
 	
 evt_gen.generate_event(ntracks = 1, nnoise = 20)

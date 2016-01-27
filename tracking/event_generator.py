@@ -7,13 +7,14 @@ from planes_geometry import planes_geom as planes
 
 class event_generator :
 	
-	def __init__(self, geometry, hit_eff, lumi_sigma, sigma) :
+	def __init__(self, geometry, hit_eff, lumi_sigma, sigma, twoD = False) :
 		
 		self.geom = geometry
 		self.hit_eff = hit_eff
 		self.lumi_sigma = lumi_sigma
 		self.sigma = sigma
-		
+		self.twoD = twoD
+
 		self.tracks = []
 	
 	
@@ -37,7 +38,9 @@ class event_generator :
 		trk["y0"]	= 0. #random.gauss(0,self.lumi_sigma[1])
 		trk["z0"]	= random.gauss(0,self.lumi_sigma[2])
 	
-		trk["phi"]   = random.uniform(0,2*math.pi)
+		trk["phi"]  = 0.
+		if not self.twoD :
+			trk["phi"]   = random.uniform(0,2*math.pi)
 		trk["alpha"] = random.uniform(min_alpha,max_alpha)
 	
 		trk["xc"]	= math.tan(trk["alpha"]) * math.cos(trk["phi"])
@@ -69,11 +72,12 @@ class event_generator :
 		trk["hits"] = []
  
 		for pl in trk["true_hits"] :
-			if len(pl) > 1 :		
+			if len(pl) > 1 :
+				y = 0.
+				if not self.twoD : y = random.gauss(pl[1], self.sigma[1])
 				trk["hits"].append( [				# Smear true hit by resolution
 					random.gauss(pl[0], self.sigma[0]),
-					random.gauss(pl[1], self.sigma[1]),
-					pl[2],
+					y, pl[2],
 					random.gauss(pl[3], self.sigma[3])
 				] )
 			else :
@@ -150,12 +154,12 @@ class event_generator :
 		fig.gca().cla()
 		fig.gca().axis([-self.geom.pl_dist,(self.geom.nplanes+1)*self.geom.pl_dist,-lim,lim])
 		
-		hits_y = []
+		hits_x = []
 		hits_z = []
 		for trk in trks :
 			for p in trk["hits"] :
 				if len(p) > 1 :
-					hits_y.append(p[1])
+					hits_x.append(p[0])
 					hits_z.append(p[2])
 		
 		for pl in range(self.geom.nplanes) :
@@ -166,7 +170,7 @@ class event_generator :
 		   		[pl*self.geom.pl_dist,pl*self.geom.pl_dist],
 				[self.geom.planes_inner_radius,self.geom.planes_outer_radius],'r') 
 
-		fig.gca().plot(hits_z,hits_y,'o',color='red')
+		fig.gca().plot(hits_z,hits_x,'o',color='red')
 		fig.savefig("event.png")	
 		plt.show()
 			
